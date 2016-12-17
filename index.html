@@ -1,0 +1,89 @@
+<html>
+<head>
+  <meta charset="utf-8" />
+  <style>
+    body {
+      margin: 0;
+    }
+  </style>
+</head>
+<body>
+  <script type="text/javascript" src="static/three.min.js"></script>
+  <script type="text/javascript" src="static/leap-0.6.4.min.js"></script>
+  <script type="text/javascript" src="static/leap-plugins-0.1.10.js"></script>
+  <script type="text/javascript" src="static/leap.rigged-hand-0.1.7.min.js"></script>
+  <script>
+    window.onload = () => {
+      open();
+    };
+
+
+    // read gestures
+    let controller = new Leap.Controller;
+
+    controller.on('frame', ({ gestures }) => {
+      if (!gestures.length) return;
+
+      let swipeGestures = gestures.filter(gesture =>
+        (gesture.state == "start" && gesture.type == 'swipe')
+      );
+
+      if (swipeGestures.length) onHit();
+    })
+
+    controller
+      .use('handHold',   {})
+      .use('handEntry',  {})
+      .use('riggedHand', {
+        'positionScale': 0.5
+      })
+      .connect();
+
+
+    // send to server
+    let webSocket;
+    let send;
+    const uri = 'ws://' + location.host + '/ws';
+
+    const open = () => {
+      webSocket = new WebSocket(uri);
+      webSocket.onopen    = onOpen;
+      webSocket.onmessage = onMessage;
+      webSocket.onclose   = onClose;
+      webSocket.onerror   = onError;
+    };
+
+    const onOpen = event => {
+      console.log('open');
+      unlock();
+    };
+
+    const onMessage = event => {
+      if (!event || !event.data) return;
+      console.log(event.data);
+    };
+
+    const onClose = event => {
+      console.log('close');
+    };
+
+    const onError = event => {
+      console.log('error');
+    };
+
+    let lock = false;
+    const onHit = () => {
+      if (lock) return;
+      lock = true;
+
+      webSocket.send('hit');
+      setTimeout(unlock, 2000);
+    };
+
+    const unlock = () => {
+      webSocket.send('default');
+      lock = false;
+    };
+  </script>
+</body>
+</html>
