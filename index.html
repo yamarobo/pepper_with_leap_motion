@@ -5,9 +5,21 @@
     body {
       margin: 0;
     }
+    .hidden {
+      visibility: hidden;
+    }
+    #hit {
+      text-align: center;
+      position: relative;
+      font-size: 100px;
+      top: 50%;
+      -webkit-transform: translateY(-50%); /* Safari用 */
+      transform: translateY(-50%);
+    }
   </style>
 </head>
 <body>
+  <h1 id="hit" class="hidden">Hit!</h1>
   <script type="text/javascript" src="static/three.min.js"></script>
   <script type="text/javascript" src="static/leap-0.6.4.min.js"></script>
   <script type="text/javascript" src="static/leap-plugins-0.1.10.js"></script>
@@ -76,12 +88,16 @@
       if (lock) return;
       lock = true;
 
+      let hit = document.getElementById('hit');
+      hit.classList.remove('hidden');
       webSocket.send('hit');
       setTimeout(unlock, 2000);
     };
 
     const unlock = () => {
       webSocket.send('default');
+      let hit = document.getElementById('hit');
+      hit.classList.add('hidden');
       lock = false;
     };
   </script>
