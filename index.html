@@ -33,14 +33,9 @@
     // read gestures
     let controller = new Leap.Controller;
 
-    controller.on('frame', ({ gestures }) => {
-      if (!gestures.length) return;
-
-      let swipeGestures = gestures.filter(gesture =>
-        (gesture.state == "start" && gesture.type == 'swipe')
-      );
-
-      if (swipeGestures.length) onHit();
+    controller.on('frame', ({ hands, gestures }) => {
+      handleGestures(gestures);
+      handleHands(hands);
     })
 
     controller
@@ -83,23 +78,39 @@
       console.log('error');
     };
 
-    let lock = false;
+    let lock = 0;
     const onHit = () => {
-      if (lock) return;
-      lock = true;
-
       let hit = document.getElementById('hit');
       hit.classList.remove('hidden');
       webSocket.send('hit');
-      setTimeout(unlock, 2000);
+      setTimeout(unlock, 3000);
+      lock = 2;
     };
 
     const unlock = () => {
-      webSocket.send('default');
       let hit = document.getElementById('hit');
       hit.classList.add('hidden');
-      lock = false;
+      lock = 0;
     };
+
+    const handleGestures = gestures => {
+      if (!gestures.length) return;
+      if (lock >= 2) return;
+
+      let swipeGestures = gestures.filter(gesture =>
+        (gesture.state == "start" && gesture.type == 'swipe')
+      );
+
+      if (swipeGestures.length) onHit();
+    };
+
+    const handleHands = hands => {
+      if (hands == null || hands.length == 0) return;
+      if (lock >= 1) return;
+      lock = 1;
+
+      webSocket.send('ready');
+    }
   </script>
 </body>
 </html>

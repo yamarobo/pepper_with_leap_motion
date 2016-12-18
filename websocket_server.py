@@ -5,8 +5,8 @@ from tornado import websocket, web, ioloop
 import socket
 import struct
 
-# host = '192.168.100.110'
-host = '127.0.0.1'
+host = '192.168.100.110'
+# host = '127.0.0.1'
 port = 13000
 backlog = 10
 bufsize = 4096

@@ -5,8 +5,8 @@ import select
 
 def main():
     #change here to specify the address of this server process
-    # host = '192.168.100.110'
-    host = '127.0.0.1'
+    host = '192.168.100.110'
+    # host = '127.0.0.1'
     port = 13000
     backlog = 10
     bufsize = 4096
@@ -38,6 +38,8 @@ def main():
                         if msg != 'get_action':
                             state = msg
                         sock.send(state)
+                        if msg == 'get_action':
+                            state = 'default'
     finally:
         for sock in readfds:
             sock.close()
